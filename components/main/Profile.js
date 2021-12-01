@@ -71,6 +71,9 @@ console.log("followed user id", props.following)
         .doc(props.route.params.uid )
         .delete()
       }
+      const onLogout =()=>{
+          firebase.auth().signOut()
+      }
     if(user===null){
         return<View/>
     }
@@ -100,7 +103,8 @@ console.log("followed user id", props.following)
 
                        
                  </View>
-             ): null }
+             ):  <Button title='Logout' onPress={()=> onLogout()}/>
+             }
              </View>
              <View style={styles.containerGallery}>
                  <FlatList
@@ -118,9 +122,7 @@ console.log("followed user id", props.following)
 
 
              </View>
-            <View style={{position:'absolute',bottom:0,flex:1}}>
-            <Button title='logout' onPress={()=> firebase.auth().signOut()}/>
-            </View>
+           
             
         </View>
     )
