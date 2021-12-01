@@ -12,10 +12,10 @@ export class Login extends Component {
             password:'123456'
             
         }
-        // this.onSignIn= this.onSignIn.bind(this)
+        this.onSignIn= this.onSignIn.bind(this)
     }
     onSignIn()  {
-        console.log("clalledf")
+        console.log("called")
         const {email,password} =this.state;
         firebase.auth().signInWithEmailAndPassword(email,password)
         .then((result) => {

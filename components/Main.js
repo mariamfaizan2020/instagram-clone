@@ -2,9 +2,11 @@ import React, { Component } from 'react'
 import {View,Text} from 'react-native'
 import {connect} from 'react-redux'
 import { bindActionCreators } from 'redux'
-import {fetchUser} from '../redux/actions/index'
+import {fetchUser,fetchUserPosts,fetchUserFollowing} from '../redux/actions/index'
 import { createMaterialBottomTabNavigator } from '@react-navigation/material-bottom-tabs';
 import FeedScreen from '../components/main/Feed'
+import searchScreen from '../components/main/search'
+import firebase from "firebase"
 
 import ProfileScreen from '../components/main/Profile'
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons'
@@ -19,6 +21,10 @@ const EmptyScreen=()=>{
 export class Main extends Component {
     componentDidMount(){
       this.props.fetchUser();
+      this.props.fetchUserPosts();
+      this.props.fetchUserFollowing();
+      
+
        }
     render() {
       // const {currentUser}=this.props;
@@ -41,6 +47,15 @@ export class Main extends Component {
 
              )
              }}/>
+              <Tab.Screen name="search" component={searchScreen} navigation={this.props.navigation}
+             
+           options={{
+             headerShown:false,
+             tabBarIcon:({color,size })=>(
+               <MaterialCommunityIcons name="magnify" color={color} size={26}/>
+
+             )
+             }}/>
         <Tab.Screen name="AddContainer" component={EmptyScreen}
               listeners={({navigation}) =>({
                  tabPress:event=>{
@@ -56,6 +71,12 @@ export class Main extends Component {
              )
              }}/>
               <Tab.Screen name="Profile" component={ProfileScreen}
+               listeners={({navigation}) =>({
+                tabPress:event=>{
+                  event.preventDefault();
+                  navigation.navigate('Profile',{uid:firebase.auth().currentUser.uid})
+                }
+             }) }
            options={{
              headerShown:false,
              tabBarIcon:({color,size })=>(
@@ -78,5 +99,5 @@ export class Main extends Component {
 const mapStateToProps=(store)=>({
   currentUser:store.userState.currentUser
 })
-const mapDispatchProps =(dispatch)=>bindActionCreators({fetchUser},dispatch)
+const mapDispatchProps =(dispatch)=>bindActionCreators({fetchUser,fetchUserPosts,fetchUserFollowing},dispatch)
 export default connect( mapStateToProps, mapDispatchProps)(Main);
