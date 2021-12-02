@@ -7,28 +7,32 @@ import {connect} from 'react-redux'
 
 function Feed(props) {
     const [posts,setPosts] = useState([]);
+    
     useEffect(()=>{
-        let posts =[];
-        console.log(props.following.length)
-        if(props.usersLoaded== props.following.length){
-            for (let i= 0; i< props.following.length; i++){
-                const user=props.users.find(el=>el.uid===props.following[i]);
-                if(user != undefined){
-                    posts=[...posts,...user.posts]
-                }
-            }
+         if(props.usersFolowingLoaded== props.following.length && props.following.length !==0){
 
-                posts.sort(function(x,y){
-                    return x.creation - y.creation;
+
+            // for (let i= 0; i< props.following.length; i++){
+            //     const user=props.users.find(el=>el.uid===props.following[i]);
+            //     if(user != undefined){
+            //         console.log('user:',user)
+            //         posts=[...posts,...user.posts]
+            //     }
+            // }
+                 props.feed.sort(function(x,y){
+                return x.creation - y.creation;
+                // posts.sort(function(x,y){
+                //     return x.creation - y.creation;
                 })
             
             
-            setPosts(posts)
+            setPosts(props.feed)
         }
+        console.log('POSTS:',posts)
 
         
-    },[props.usersLoaded])
-
+    },[props.usersFolowingLoaded,props.feed])
+  
     
     
     return (
@@ -44,6 +48,11 @@ function Feed(props) {
                         <Image 
                      style={styles.image}
                      source={{uri :item.downloadURL}}/>
+                     <Text 
+                        onPress={()=>props.navigation.navigate('Comment',
+                       {postId:item.id,uid:item.user.uid})
+                      }>
+                         View Comments....</Text>
                    </View>
                     
                  )}/>
@@ -77,7 +86,7 @@ const styles= StyleSheet.create({
 const mapStateToProps=(store)=>({
     currentUser:store.userState.currentUser,
     following:store.userState.following,
-    users: store.usersState.users,
-    usersLoaded: store.usersState.usersLoaded,
+    feed: store.usersState.feed,
+    usersFolowingLoaded: store.usersState.usersFolowingLoaded,
 })
 export default connect(mapStateToProps,null)(Feed);

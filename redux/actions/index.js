@@ -1,5 +1,5 @@
 import firebase from 'firebase';
-import { USER_STATE_CHANGE ,USER_POSTS_STATE_CHANGE,USER_FOLLOWING_STATE_CHANGE,USERS_DATA_STATE_CHANGE,USERS_POSTS_STATE_CHANGE,CLEAR_DATA} from '../constants/index';
+import { USER_STATE_CHANGE ,USER_POSTS_STATE_CHANGE,USER_FOLLOWING_STATE_CHANGE,USERS_LIKES_STATE_CHANGE,USERS_DATA_STATE_CHANGE,USERS_POSTS_STATE_CHANGE,CLEAR_DATA} from '../constants/index';
 
 
 export function clearData(){
@@ -67,7 +67,7 @@ export function fetchUserFollowing(){
           
            dispatch({type: USER_FOLLOWING_STATE_CHANGE, following })
            for(let i=0; i<following.length; i++){
-               dispatch(fetchUsersData(following[i]))
+               dispatch(fetchUsersData(following[i],true))
            }
             
             
@@ -76,7 +76,7 @@ export function fetchUserFollowing(){
     })
 }
 
-export function fetchUsersData(uid){
+export function fetchUsersData(uid,getPosts){
     return((dispatch,getState)=>{
         //el=elemnt .this function is to check whether the provided uid is found in the users array from users.js or not
         const found=getState().usersState.users.some(el=>el.uid===uid);
@@ -91,11 +91,14 @@ export function fetchUsersData(uid){
                     let user =snapshot.data();
                     user.uid = snapshot.id
                    dispatch({type:USERS_DATA_STATE_CHANGE, user})
-                   dispatch(fetchUsersFollowingPosts(user.uid))
+                   
                 
              
                 }else{
                     console.log('Does not exist')
+                }
+                if(getPosts){
+                    dispatch(fetchUsersFollowingPosts(uid))
                 }
             })
     
@@ -116,7 +119,7 @@ export function fetchUsersData(uid){
             .then((snapshot)=>{
 
                 //  const uid =  snapshot.query._.C.path.segments[1];
-                 console.log({snapshot, uid});
+                //  console.log({snapshot, uid});
                  const user=getState().usersState.users.find(el=>el.uid===uid);
   
 
@@ -126,9 +129,11 @@ export function fetchUsersData(uid){
                     return{id,...data,user}
                 })
             
-               console.log("docs",posts);
+               for(let i=0; i < posts.length; i++){
+                   dispatch(fetchUsersFollowingLikes(uid,posts[i].id))
+               }
                dispatch({type: USERS_POSTS_STATE_CHANGE, posts,uid});
-               console.log("posts",getState())
+          
               
                
                 
@@ -137,3 +142,35 @@ export function fetchUsersData(uid){
     
         })
     }
+
+    export function fetchUsersFollowingLikes(uid,postId){
+        return((dispatch,getState)=>{
+      
+           firebase.firestore()
+           .collection('posts')
+           .doc(uid)
+           .collection('userPosts')
+           .doc(postId)
+           .collection('likes')
+           .doc(firebase.auth().currentUser.uid)
+            .onSnapshot((snapshot)=>{
+                // console.log("snapshot1234",snapshot)
+                //   const postId=  snapshot.query.ZE.path.segments[3];
+                  console.log('POSTID:',postId)
+
+                  let currentUserLike= false;
+                  if(snapshot.exists){
+                      currentUserLike=true;
+                  }
+
+                
+              dispatch({type: USERS_LIKES_STATE_CHANGE, postId,currentUserLike});
+              
+             
+              
+               
+               
+           })
+   
+       })
+   }
