@@ -161,6 +161,7 @@ export function fetchUsersData(uid,getPosts){
                   let currentUserLike= false;
                   if(snapshot.exists){
                       currentUserLike=true;
+                      console.log('likesValue',currentUserLike)
                   }
 
                 
